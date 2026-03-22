@@ -1,6 +1,7 @@
 ---
 name: ubuntu-encyclopedia
 description: Ubuntu documentation-first workflow for Ubuntu-specific questions, maintenance, updates, upgrades, package management, system administration, service troubleshooting, networking, storage, logs, release behavior, and diagnostics. Use whenever Ubuntu, apt, apt-get, dpkg, snap, systemd, systemctl, journalctl, Netplan, NetworkManager, release upgrade, package repair, repository/key issues, service failures, boot issues, mounts, fstab, permissions, users/groups, or Ubuntu-specific troubleshooting/maintenance is mentioned, implied, or required. Do not use for generic shell work that is not materially Ubuntu-specific. Also use before answering Ubuntu-specific questions and before performing non-trivial Ubuntu maintenance or troubleshooting work.
+metadata: {"openclaw":{"emoji":"🟠","homepage":"https://manpages.ubuntu.com/manpages/","os":["linux"]}}
 ---
 
 # Ubuntu Encyclopedia
