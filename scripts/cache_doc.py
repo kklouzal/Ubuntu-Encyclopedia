@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import ipaddress
 import re
 import urllib.parse
 import urllib.request
@@ -70,8 +71,20 @@ def validate_url(url: str) -> urllib.parse.ParseResult:
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme not in ALLOWED_SCHEMES:
         raise ValueError(f'Only {sorted(ALLOWED_SCHEMES)} URLs are supported')
-    if parsed.netloc not in ALLOWED_NETLOCS:
+    if parsed.username or parsed.password:
+        raise ValueError('Userinfo in URLs is not supported')
+    if parsed.hostname is None:
+        raise ValueError('URL must include a hostname')
+    try:
+        ipaddress.ip_address(parsed.hostname)
+    except ValueError:
+        pass
+    else:
+        raise ValueError('Direct IP URLs are not supported')
+    if parsed.hostname not in ALLOWED_NETLOCS:
         raise ValueError(f'Only {sorted(ALLOWED_NETLOCS)} URLs are supported')
+    if parsed.port is not None:
+        raise ValueError('Explicit ports are not supported')
     return parsed
 
 

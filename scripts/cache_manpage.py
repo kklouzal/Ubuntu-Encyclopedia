@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import ipaddress
 import re
 import urllib.parse
 import urllib.request
@@ -11,6 +12,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ALLOWED_NETLOC = 'manpages.ubuntu.com'
+ALLOWED_SCHEMES = {'https'}
 
 
 class TextExtractor(HTMLParser):
@@ -65,10 +67,28 @@ def default_root() -> Path:
     return Path.cwd() / '.Ubuntu-Encyclopedia'
 
 
-def build_output_path(root: Path, url: str) -> Path:
+def validate_url(url: str) -> urllib.parse.ParseResult:
     parsed = urllib.parse.urlparse(url)
-    if parsed.netloc != ALLOWED_NETLOC:
+    if parsed.scheme not in ALLOWED_SCHEMES:
+        raise ValueError(f'Only {sorted(ALLOWED_SCHEMES)} URLs are supported')
+    if parsed.username or parsed.password:
+        raise ValueError('Userinfo in URLs is not supported')
+    if parsed.hostname is None:
+        raise ValueError('URL must include a hostname')
+    try:
+        ipaddress.ip_address(parsed.hostname)
+    except ValueError:
+        pass
+    else:
+        raise ValueError('Direct IP URLs are not supported')
+    if parsed.hostname != ALLOWED_NETLOC:
         raise ValueError(f'Only {ALLOWED_NETLOC} URLs are supported')
+    if parsed.port is not None:
+        raise ValueError('Explicit ports are not supported')
+    return parsed
+
+
+def build_output_path(root: Path, parsed: urllib.parse.ParseResult) -> Path:
     path = parsed.path or '/'
     if path.endswith('/'):
         path += 'index'
@@ -89,13 +109,14 @@ def main() -> int:
     parser.add_argument('--root', default=str(default_root()), help='Ubuntu Encyclopedia data root (default: <cwd>/.Ubuntu-Encyclopedia)')
     args = parser.parse_args()
 
+    parsed = validate_url(args.url)
     root = Path(args.root).expanduser().resolve()
     html_body = fetch_html(args.url)
     extractor = TextExtractor()
     extractor.feed(html_body)
-    title = extractor.title.strip() or Path(urllib.parse.urlparse(args.url).path).name or 'Ubuntu Manpage'
+    title = extractor.title.strip() or Path(parsed.path).name or 'Ubuntu Manpage'
     body = extractor.text()
-    out = build_output_path(root, args.url)
+    out = build_output_path(root, parsed)
     out.parent.mkdir(parents=True, exist_ok=True)
     content = (
         f'# {title}\n\n'
