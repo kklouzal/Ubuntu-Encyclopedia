@@ -110,6 +110,12 @@ Use `scripts/init_workspace.py` to create or repair the expected directory struc
 - Cached manpages → `.Ubuntu-Encyclopedia/manpages/manpages.ubuntu.com/...`
 - Cached official docs → `.Ubuntu-Encyclopedia/docs/...`
 
+## Secrets / Sensitive Data
+
+- Do not store plaintext credentials, API keys, session tokens, private URLs, recovery codes, or other secrets in the encyclopedia notes/inventory tree.
+- If a note needs to mention access details, keep it high-level and redact or omit secret material.
+- Treat these workspace notes as operational memory, not as a secrets vault.
+
 ## Resources
 
 - `scripts/init_workspace.py` — create or repair the `.Ubuntu-Encyclopedia/` directory tree.
